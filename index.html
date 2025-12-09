@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CoverEdge Live Match</title>
 
+<!-- HLS.js for full .m3u8 playback support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
     body {
         background: #000;
@@ -22,15 +25,14 @@
         font-weight: bold;
     }
 
-    /* Video Player Container Styling */
+    /* Video Player Container */
     .video-container {
         max-width: 90%;
         margin: 20px auto;
-        /* Initially hidden */
-        display: none; 
+        display: none;
     }
     
-    /* Ensure the video takes full width of its container */
+    /* Video Full Responsive */
     #liveVideo {
         width: 100%;
         height: auto;
@@ -38,9 +40,17 @@
         background: #111;
     }
 
-    /* Popup box styling */
+    /* Loader Text */
+    #loader {
+        color: #00e5ff;
+        font-size: 18px;
+        display: none;
+        margin-top: 20px;
+    }
+
+    /* Popup Styling */
     .popup {
-        display: flex; /* Use flexbox to center content */
+        display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
@@ -49,8 +59,16 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.95); /* Semi-transparent overlay */
+        background: rgba(0, 0, 0, 0.95);
         z-index: 9999;
+
+        /* Fade Animation */
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 
     .popup-content {
@@ -81,7 +99,7 @@
         text-decoration: none;
         border-radius: 8px;
         display: inline-block;
-        margin: 8px; /* Added margin for spacing between buttons */
+        margin: 8px;
         cursor: pointer;
         transition: background-color 0.2s;
     }
@@ -90,9 +108,8 @@
         background: #00c853;
     }
 
-    /* Style for the secondary "Already Joined" button */
     .btn.secondary {
-        background: #444; /* Darker, less prominent color */
+        background: #444;
         color: white;
     }
 
@@ -107,39 +124,52 @@
         color: #00ff90;
         margin-bottom: 20px;
     }
+
+    /* Responsive Fixes */
+    @media (max-width: 600px) {
+        h1 {
+            font-size: 28px;
+        }
+        .popup-content {
+            padding: 20px;
+            width: 90%;
+        }
+        #liveVideo {
+            height: auto;
+        }
+    }
 </style>
 
 <script>
-    // 📢 NEW STREAMING URL HAS BEEN UPDATED HERE
-    const STREAM_URL = "https://foxenglish.pages.dev/playlist.m3u8";
+const STREAM_URL = "https://foxenglish.pages.dev/playlist.m3u8";
 
-    function startVideo() {
-        // 1. Hide the popup
-        document.getElementById('popupContainer').style.display = 'none';
+function startVideo() {
+    document.getElementById('popupContainer').style.display = 'none';
+    document.getElementById('videoArea').style.display = 'block';
+    document.getElementById('loader').style.display = 'block';
 
-        // 2. Show the video container
-        document.getElementById('videoArea').style.display = 'block';
+    const video = document.getElementById('liveVideo');
 
-        // 3. Set the stream source and attempt to play
-        const videoElement = document.getElementById('liveVideo');
-        
-        // Check if the browser natively supports HLS (M3U8)
-        if (videoElement.canPlayType('application/vnd.apple.mpegurl') || videoElement.canPlayType('application/x-mpegurl')) {
-            videoElement.src = STREAM_URL;
-        } 
-        
-        // Note: For full cross-browser compatibility, especially on non-Apple devices, 
-        // you would typically integrate a library like HLS.js here. 
-        // For simplicity, we stick to native support in this example.
-
-        videoElement.load();
-        // Try to start playback (it might require a user gesture on some browsers)
-        videoElement.play().catch(error => {
-            console.warn("Autoplay failed:", error);
-            // Inform user to click play manually if autoplay fails
-            // You can add an overlay here instructing the user to tap to play
+    // If HLS.js is supported
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(STREAM_URL);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
         });
+    } 
+    // If iPhone / Safari supports HLS
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = STREAM_URL;
+        video.play();
     }
+
+    // Hide loader when video starts playing
+    video.addEventListener("playing", () => {
+        document.getElementById("loader").style.display = "none";
+    });
+}
 </script>
 
 </head>
@@ -147,19 +177,23 @@
 
 <h1>CoverEdge Live Match</h1>
 
+<!-- Loader -->
+<div id="loader">Loading stream...</div>
+
+<!-- Video Area -->
 <div class="video-container" id="videoArea">
     <video id="liveVideo" controls autoplay muted poster="" preload="auto">
         Your browser does not support the video tag.
     </video>
 </div>
 
+<!-- Popup -->
 <div class="popup" id="popupContainer">
     <div class="popup-content">
         <h2>Join CoverEdge on Telegram</h2>
         <p>Subscribe for Live Match Clips, Rare Clips & More!</p>
 
         <a class="btn" href="https://t.me/CoverEdge45" target="_blank" onclick="startVideo();">JOIN NOW</a>
-        
         <button class="btn secondary" onclick="startVideo();">Already Joined</button>
     </div>
 </div>
