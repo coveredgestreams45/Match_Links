@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CoverEdge Live Match</title>
+
+<!-- HLS.js for full .m3u8 playback support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<style>
+    body {
+        background: #000;
+        color: white;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        padding: 0;
+        margin: 0;
+    }
+
+    h1 {
+        margin-top: 40px;
+        color: #00e5ff;
+        font-size: 40px;
+        font-weight: bold;
+    }
+
+    /* Video Player Container */
+    .video-container {
+        max-width: 90%;
+        margin: 20px auto;
+        display: none;
+    }
+    
+    /* Video Full Responsive */
+    #liveVideo {
+        width: 100%;
+        height: auto;
+        border: 2px solid #00e5ff;
+        background: #111;
+    }
+
+    /* Loader Text */
+    #loader {
+        color: #00e5ff;
+        font-size: 18px;
+        display: none;
+        margin-top: 20px;
+    }
+
+    /* Popup Styling */
+    .popup {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+
+        /* Fade Animation */
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .popup-content {
+        background: #222;
+        padding: 30px;
+        width: 80%;
+        max-width: 350px;
+        border-radius: 12px;
+        box-shadow: 0px 0px 30px #00e5ff;
+    }
+
+    .popup h2 {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: #00e5ff;
+    }
+
+    .popup p {
+        font-size: 18px;
+        margin-bottom: 25px;
+    }
+
+    .btn {
+        background: #00e676;
+        padding: 12px 20px;
+        color: black;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+        background: #00c853;
+    }
+
+    .btn.secondary {
+        background: #444;
+        color: white;
+    }
+
+    .btn.secondary:hover {
+        background: #555;
+    }
+
+    .link {
+        margin-top: 30px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #00ff90;
+        margin-bottom: 20px;
+    }
+
+    /* Responsive Fixes */
+    @media (max-width: 600px) {
+        h1 {
+            font-size: 28px;
+        }
+        .popup-content {
+            padding: 20px;
+            width: 90%;
+        }
+        #liveVideo {
+            height: auto;
+        }
+    }
+</style>
+
+<script>
+const STREAM_URL = "https://cricloungelive.short.gy/ashes25/fox.m3u8";
+
+function startVideo() {
+    document.getElementById('popupContainer').style.display = 'none';
+    document.getElementById('videoArea').style.display = 'block';
+    document.getElementById('loader').style.display = 'block';
+
+    const video = document.getElementById('liveVideo');
+
+    // If HLS.js is supported
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(STREAM_URL);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            video.play();
+        });
+    } 
+    // If iPhone / Safari supports HLS
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = STREAM_URL;
+        video.play();
+    }
+
+    // Hide loader when video starts playing
+    video.addEventListener("playing", () => {
+        document.getElementById("loader").style.display = "none";
+    });
+}
+</script>
+
+</head>
+<body>
+
+<h1>CoverEdge Live Match</h1>
+
+<!-- Loader -->
+<div id="loader">Loading stream...</div>
+
+<!-- Video Area -->
+<div class="video-container" id="videoArea">
+    <video id="liveVideo" controls autoplay muted poster="" preload="auto">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<!-- Popup -->
+<div class="popup" id="popupContainer">
+    <div class="popup-content">
+        <h2>Join CoverEdge on Telegram</h2>
+        <p>Subscribe for Live Match Clips, Rare Clips & More!</p>
+
+        <a class="btn" href="https://t.me/CoverEdge45" target="_blank" onclick="startVideo();">JOIN NOW</a>
+        <button class="btn secondary" onclick="startVideo();">Already Joined</button>
+    </div>
+</div>
+
+<p class="link">
+    <a href="https://t.me/CoverEdge45" target="_blank" style="color:#00ff90; text-decoration:none;">
+        t.me/CoverEdge45
+    </a>
+</p>
+
+</body>
+</html>
